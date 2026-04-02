@@ -123,6 +123,7 @@ CF 1.503 evaluated interactively on H100. No log saved — reproducible by runni
 | `train_cdm.py` | Shared AR+CDM dual-brain training (PyTorch) |
 | `eval_sequential_unmasking.py` | Sequential Unmasking eval |
 | `eval_ttt.py` | TTT eval |
+| `RUNBOOK.md` | 8xH100 rerun + verification checklist |
 | `bpe_v4096.model` | Custom tokenizer (294KB) |
 | `train.log` | H100 training log (5L v4096 AR) |
 
