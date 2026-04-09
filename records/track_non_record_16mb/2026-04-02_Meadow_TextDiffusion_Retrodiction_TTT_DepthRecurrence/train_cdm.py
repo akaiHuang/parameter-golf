@@ -1042,8 +1042,18 @@ def main():
             torch.save(ckpt, ckpt_path)
             print_main(f"  Checkpoint saved: {ckpt_path}")
 
-    # ---- Save final model ----
+    # ---- Save final checkpoint + final model ----
     if is_main():
+        if args.checkpoint_dir:
+            final_ckpt_path = os.path.join(args.checkpoint_dir, "step_final.pt")
+            final_ckpt = {
+                "step": step,
+                "model": raw_model.state_dict(),
+                "ema": ema_state.shadow if ema_state else None,
+            }
+            torch.save(final_ckpt, final_ckpt_path)
+            print_main(f"Saved final checkpoint to {final_ckpt_path}")
+
         # Save as npz
         sd = raw_model.state_dict()
         np_weights = {}
