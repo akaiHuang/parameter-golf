@@ -9,7 +9,7 @@ Usage on pod:
         --train_script ./train_cdm.py \
         --num_layers 5 --model_dim 256 --vocab_size 4096 \
         --bigram_dim 128 --xsa_last_n 2 \
-        --cdm_weight 0.3 --seed 42 \
+        --cdm_weight 0.3 \
         -- \
         --steps 7000 --train_budget_secs 540 \
         --data_dir /workspace/data_v4096 \
@@ -41,7 +41,8 @@ def main():
     ap.add_argument("--cdm_weight", type=float, required=True,
                     help="Weight on the denoising loss. 0 = disable CDM (causal-only control).")
     ap.add_argument("--seed", type=int, default=None,
-                    help="Optional training seed override. Patches the module-level SEED constant.")
+                    help="Override module-level SEED constant in train_cdm.py "
+                         "(default: leave the script's baked-in seed, 1337, unchanged).")
 
     # Split on -- to separate runner args from passthrough args
     if "--" in sys.argv:
@@ -129,8 +130,7 @@ def main():
     print(f"[ablation runner] patched script written to {out_script}")
     print(f"[ablation runner] config: {args.num_layers}L d={args.model_dim} "
           f"vocab={args.vocab_size} xsa={args.xsa_last_n} "
-          f"bigram={args.bigram_dim} cdm_weight={args.cdm_weight} "
-          f"seed={args.seed if args.seed is not None else 'default'}")
+          f"bigram={args.bigram_dim} cdm_weight={args.cdm_weight}")
 
     # --- Exec the patched source with passthrough argv ---
     sys.argv = [args.train_script] + passthrough
