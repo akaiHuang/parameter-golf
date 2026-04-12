@@ -19,9 +19,32 @@ BPB = -Σ log₂ P(x_t | x_{<t}, rand_{≥t}) / total_bytes
 import glob, math, time, os
 import numpy as np
 import sentencepiece as spm
-import mlx.core as mx
-import mlx.nn as nn
-from mlx.utils import tree_flatten, tree_unflatten
+# MLX imports — guarded so this Apple-Silicon-only pre-flight script can be
+# IMPORTED on Linux CPU smoke-test environments (Python 3.10 + torch CPU,
+# where `pip install mlx` is not possible). The stub class below lets module-
+# level definitions like `class Foo(nn.Module):` and `COMPUTE_DTYPE = mx.bfloat16`
+# parse without crashing; any actual MLX call only happens inside main() and
+# fails clearly when the script is run as __main__ on a non-Apple machine.
+try:
+    import mlx.core as mx
+    import mlx.nn as nn
+    from mlx.utils import tree_flatten, tree_unflatten
+    _HAS_MLX = True
+except ImportError:
+    _HAS_MLX = False
+    class _MlxStub:
+        """Permissive stub: any attribute access or call returns another stub.
+        Lets `class Foo(nn.Module):` and `COMPUTE_DTYPE = mx.bfloat16` parse on
+        a non-Apple machine without raising at module load time."""
+        Module = type("Module", (object,), {})
+        def __getattr__(self, name): return _MlxStub()
+        def __call__(self, *a, **k): return _MlxStub()
+    mx = _MlxStub()
+    nn = _MlxStub()
+    def tree_flatten(*a, **k):
+        raise RuntimeError("MLX not available; this script is Apple Silicon only.")
+    def tree_unflatten(*a, **k):
+        raise RuntimeError("MLX not available; this script is Apple Silicon only.")
 
 COMPUTE_DTYPE = mx.bfloat16
 DATA_DIR = "/Users/akaihuangm1/Desktop/github/parameter-golf/data/datasets/fineweb10B_sp1024"
